@@ -25,6 +25,10 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Styling
+
+This project uses NativeWind 5 with Tailwind CSS 4. Add reusable app styles to [global.css](./global.css), then apply them with `className` in the screen or component. For example, `home-budgetCard` is defined in `global.css` and used as `className="home-budgetCard"` in the Home screen. Keep styles that depend on runtime data, such as a subscription's icon color, in a `style` prop.
+
 ## Get a fresh project
 
 When you're ready, run:
@@ -54,3 +58,4 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# S-Wise
