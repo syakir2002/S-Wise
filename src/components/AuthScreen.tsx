@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { styled } from 'nativewind';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   Text,
@@ -9,20 +10,50 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
+import { toast } from '../utils/toast';
 
 const StyledSafeAreaView = styled(SafeAreaView);
 
 type AuthMode = 'sign-in' | 'sign-up';
 
 export default function AuthScreen({ mode }: { mode: AuthMode }) {
+  const { login, register } = useAuth();
   const [activeMode, setActiveMode] = useState(mode);
   const isSignUp = activeMode === 'sign-up';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const changeMode = (nextMode: AuthMode) => {
     setActiveMode(nextMode);
+  };
+
+  const handleSubmit = async () => {
+    if (!email.trim() || !password.trim() || (isSignUp && !name.trim())) {
+      toast.error('Required Fields', 'Please fill in all required fields.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (isSignUp) {
+        await register(name.trim(), email.trim(), password);
+        toast.success('Account Created', 'Welcome to S-wise!');
+      } else {
+        await login(email.trim(), password);
+        toast.success('Welcome Back', 'Signed in successfully.');
+      }
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      toast.error(
+        isSignUp ? 'Registration Failed' : 'Sign In Failed',
+        error.message || 'Something went wrong. Please check your credentials.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -129,20 +160,22 @@ export default function AuthScreen({ mode }: { mode: AuthMode }) {
           )}
         </View>
 
-        {isSignUp ? (
-          <View className="auth-submitButton">
-            <Text className="auth-submitText">Create account</Text>
-            <Text className="auth-submitArrow">→</Text>
-          </View>
-        ) : (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.replace('/(tabs)')}
-            className="auth-submitButton">
-            <Text className="auth-submitText">Sign in</Text>
-            <Text className="auth-submitArrow">→</Text>
-          </Pressable>
-        )}
+        <Pressable
+          accessibilityRole="button"
+          disabled={loading}
+          onPress={handleSubmit}
+          className="auth-submitButton">
+          {loading ? (
+            <ActivityIndicator color="#1E2B24" />
+          ) : (
+            <>
+              <Text className="auth-submitText">
+                {isSignUp ? 'Create account' : 'Sign in'}
+              </Text>
+              <Text className="auth-submitArrow">→</Text>
+            </>
+          )}
+        </Pressable>
 
         <Text className="auth-footer">
           {isSignUp

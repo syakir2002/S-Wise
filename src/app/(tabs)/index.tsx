@@ -1,26 +1,34 @@
-import { styled } from 'nativewind';
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AppIcon from '../../components/AppIcon';
-import ProfileMenu from '../../components/ProfileMenu';
-import { transactions } from '../../data/transactions';
+import { router } from "expo-router";
+import { styled } from "nativewind";
+import { useState } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import AppIcon from "../../components/AppIcon";
+import ProfileMenu from "../../components/ProfileMenu";
+import { useAuth } from "../../context/AuthContext";
+import { transactions } from "../../data/transactions";
 
 const StyledSafeAreaView = styled(SafeAreaView);
 
 export default function HomeScreen() {
-  const [expandedTransactionId, setExpandedTransactionId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const [expandedTransactionId, setExpandedTransactionId] = useState<
+    string | null
+  >(null);
 
   return (
-    <StyledSafeAreaView className="home-safeArea" edges={['top']}>
+    <StyledSafeAreaView className="home-safeArea" edges={["top"]}>
       <ScrollView
         className="home-screen"
         contentContainerClassName="home-content"
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <View className="home-header">
           <View>
-            <Text className="home-greeting">Hi, [Fullname] 👋</Text>
-            <Text className="home-subtitle">A little clarity for your everyday.</Text>
+            <Text className="home-greeting">Hi, {user?.name || 'there'} 👋</Text>
+            <Text className="home-subtitle">
+              A little clarity for your everyday.
+            </Text>
           </View>
           <ProfileMenu />
         </View>
@@ -41,7 +49,9 @@ export default function HomeScreen() {
               <Text className="home-totalLabel">
                 <Text className="home-greenDot">• </Text>Expenses
               </Text>
-              <Text className="home-totalAmount home-expensesAmount">$1,600.00</Text>
+              <Text className="home-totalAmount home-expensesAmount">
+                $1,600.00
+              </Text>
             </View>
           </View>
 
@@ -49,7 +59,9 @@ export default function HomeScreen() {
             <View className="home-balanceText">
               <Text className="home-balanceLabel">Current Balance</Text>
               <Text className="home-balanceAmount">$2,400.00</Text>
-              <Text className="home-balanceCaption">60% of your budget remaining</Text>
+              <Text className="home-balanceCaption">
+                60% of your budget remaining
+              </Text>
             </View>
             <View className="home-gauge">
               <View className="home-gaugeInner">
@@ -61,7 +73,13 @@ export default function HomeScreen() {
 
         <View className="home-sectionHeader">
           <Text className="home-sectionTitle">Recent Transactions</Text>
-          <Text className="home-viewAll">View all ↗</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="View all transactions"
+            onPress={() => router.navigate("/transaction")}
+          >
+            <Text className="home-viewAllText">View all ↗</Text>
+          </Pressable>
         </View>
 
         <View className="home-listHeader">
@@ -81,23 +99,34 @@ export default function HomeScreen() {
                 onPress={() =>
                   setExpandedTransactionId(expanded ? null : transaction.id)
                 }
-                className="home-transactionRow">
-                <Text className="home-dateText home-dateColumn">{transaction.date}</Text>
+                className="home-transactionRow"
+              >
+                <Text className="home-dateText home-dateColumn">
+                  {transaction.date}
+                </Text>
                 <View className="home-transactionDetails">
                   <View className="home-categoryIcon">
-                    <AppIcon name={transaction.icon} tintColor="#376A43" size={18} />
+                    <AppIcon
+                      name={transaction.icon}
+                      tintColor="#376A43"
+                      size={18}
+                    />
                   </View>
                   <View className="home-transactionText">
-                    <Text className="home-categoryName">{transaction.category}</Text>
-                    <Text className="home-description">{transaction.transactionName}</Text>
+                    <Text className="home-categoryName">
+                      {transaction.category}
+                    </Text>
+                    <Text className="home-description">
+                      {transaction.transactionName}
+                    </Text>
                   </View>
                 </View>
                 <Text className="home-amountText">{transaction.amount}</Text>
                 <AppIcon
                   name={{
-                    ios: expanded ? 'chevron.up' : 'chevron.down',
-                    android: expanded ? 'expand_less' : 'expand_more',
-                    web: expanded ? 'expand_less' : 'expand_more',
+                    ios: expanded ? "chevron.up" : "chevron.down",
+                    android: expanded ? "expand_less" : "expand_more",
+                    web: expanded ? "expand_less" : "expand_more",
                   }}
                   tintColor="#7D857E"
                   size={16}
@@ -105,9 +134,18 @@ export default function HomeScreen() {
               </Pressable>
               {expanded && (
                 <View className="home-transactionExpanded">
-                  <DetailRow label="Transaction" value={transaction.transactionName} />
-                  <DetailRow label="Description" value={transaction.description} />
-                  <DetailRow label="Payment method" value={transaction.paymentMethod} />
+                  <DetailRow
+                    label="Transaction"
+                    value={transaction.transactionName}
+                  />
+                  <DetailRow
+                    label="Description"
+                    value={transaction.description}
+                  />
+                  <DetailRow
+                    label="Payment method"
+                    value={transaction.paymentMethod}
+                  />
                   <DetailRow label="Created at" value={transaction.createdAt} />
                 </View>
               )}

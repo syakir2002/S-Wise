@@ -1,9 +1,14 @@
 import { router } from 'expo-router';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useState } from 'react';
 import AppIcon from './AppIcon';
+import { useAuth } from '../context/AuthContext';
+import { useConfirm } from '../context/ConfirmContext';
+import { toast } from '../utils/toast';
 
 export default function ProfileMenu() {
+  const { logout } = useAuth();
+  const { confirm } = useConfirm();
   const [visible, setVisible] = useState(false);
 
   const openProfile = () => {
@@ -11,12 +16,30 @@ export default function ProfileMenu() {
     router.navigate({ pathname: '/setting', params: { view: 'profile' } });
   };
 
-  const showLogoutUnavailable = () => {
+  const handleLogout = () => {
     setVisible(false);
-    Alert.alert(
-      'Sign out unavailable',
-      'There is no authentication session configured to sign out of yet.',
-    );
+    confirm({
+      title: 'Log out of S-wise?',
+      message:
+        'Are you sure you want to log out? You will need to sign in again to access your account.',
+      confirmText: 'Log Out',
+      cancelText: 'Cancel',
+      type: 'danger',
+      icon: {
+        ios: 'rectangle.portrait.and.arrow.right',
+        android: 'logout',
+        web: 'logout',
+      },
+      onConfirm: async () => {
+        try {
+          await logout();
+          toast.info('Signed Out', 'You have been logged out.');
+          router.replace('/(auth)/sign-in');
+        } catch (e: any) {
+          toast.error('Error', e.message || 'Failed to log out');
+        }
+      },
+    });
   };
 
   return (
@@ -50,7 +73,7 @@ export default function ProfileMenu() {
           <View className={"profile-menu-menuDivider"} />
           <Pressable
             accessibilityRole="button"
-            onPress={showLogoutUnavailable}
+            onPress={handleLogout}
             className={"profile-menu-menuItem active:opacity-80 active:scale-[0.98]"}>
             <AppIcon
               name={{

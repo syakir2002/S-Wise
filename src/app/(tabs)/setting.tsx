@@ -6,6 +6,7 @@ import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppIcon, { type IconName } from '../../components/AppIcon';
 import ProfileMenu from '../../components/ProfileMenu';
+import { useAuth } from '../../context/AuthContext';
 
 const StyledSafeAreaView = styled(SafeAreaView);
 
@@ -24,26 +25,27 @@ const preferenceRows: {
   icon: IconName;
   initialValue: boolean;
 }[] = [
-  {
-    title: 'Push notifications',
-    description: 'Get important updates about your spending',
-    icon: { ios: 'bell.badge.fill', android: 'notifications', web: 'notifications' },
-    initialValue: true,
-  },
-  {
-    title: 'Weekly summary',
-    description: 'A quick recap of your weekly activity',
-    icon: { ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' },
-    initialValue: false,
-  },
-];
+    {
+      title: 'Push notifications',
+      description: 'Get important updates about your spending',
+      icon: { ios: 'bell.badge.fill', android: 'notifications', web: 'notifications' },
+      initialValue: true,
+    },
+    {
+      title: 'Weekly summary',
+      description: 'A quick recap of your weekly activity',
+      icon: { ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' },
+      initialValue: false,
+    },
+  ];
 
 export default function SettingScreen() {
+  const { user } = useAuth();
   const { view } = useLocalSearchParams<{ view?: string }>();
   const [preferences, setPreferences] = useState(
     Object.fromEntries(preferenceRows.map((row) => [row.title, row.initialValue])),
   );
-  const [profile, setProfile] = useState({ name: '', email: '' });
+  const [profile, setProfile] = useState({ name: user?.name || '', email: user?.email || '' });
 
   const showUnavailableMessage = (feature: string) => {
     Alert.alert(feature, `${feature} settings are not available yet.`);
@@ -70,125 +72,125 @@ export default function SettingScreen() {
           />
         ) : (
           <>
-        <View className={"settings-header"}>
-          <View>
-            <Text className={"settings-eyebrow"}>MAKE IT YOURS</Text>
-            <Text className={"settings-title"}>Settings</Text>
-            <Text className={"settings-description"}>Manage your account and preferences.</Text>
-          </View>
-          <ProfileMenu />
-        </View>
-
-        <Pressable
-          accessibilityRole="button"
-          onPress={openProfileForm}
-          className={"settings-profileCard active:opacity-80 active:scale-[0.98]"}>
-          <View className={"settings-avatar"}>
-            <AppIcon
-              name={{ ios: 'person.fill', android: 'person', web: 'person' }}
-              tintColor={colors.dark}
-              size={22}
-            />
-          </View>
-          <View className={"settings-profileInfo"}>
-            <Text className={"settings-profileName"}>{profile.name || 'Your profile'}</Text>
-            <Text className={"settings-profileDescription"}>
-              {profile.email || 'Personal details and account info'}
-            </Text>
-          </View>
-          <View className={"settings-profileArrow"}>
-            <AppIcon
-              name={{ ios: 'arrow.up.right', android: 'north_east', web: 'north_east' }}
-              tintColor={colors.dark}
-              size={16}
-            />
-          </View>
-        </Pressable>
-
-        <SettingsSection title="PREFERENCES">
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => showUnavailableMessage('Currency')}
-            className={"settings-row settings-valueRow active:opacity-[0.72]"}>
-            <SettingIcon
-              name={{ ios: 'dollarsign', android: 'attach_money', web: 'attach_money' }}
-            />
-            <View className={"settings-rowText"}>
-              <Text className={"settings-rowTitle"}>Currency</Text>
-              <Text className={"settings-rowDescription"}>US Dollar (USD)</Text>
-            </View>
-            <AppIcon
-              name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
-              tintColor="#A0A9A1"
-              size={16}
-            />
-          </Pressable>
-          <View className={"settings-rowDivider"} />
-          {preferenceRows.map((row, index) => (
-            <View key={row.title}>
-              {index > 0 && <View className={"settings-rowDivider"} />}
-              <View className={"settings-row"}>
-                <SettingIcon name={row.icon} />
-                <View className={"settings-rowText"}>
-                  <Text className={"settings-rowTitle"}>{row.title}</Text>
-                  <Text className={"settings-rowDescription"}>{row.description}</Text>
-                </View>
-                <Pressable
-                  accessibilityRole="switch"
-                  accessibilityLabel={row.title}
-                  accessibilityState={{ checked: preferences[row.title] }}
-                  onPress={() =>
-                    setPreferences((current) => ({
-                      ...current,
-                      [row.title]: !current[row.title],
-                    }))
-                  }
-                  className={["settings-toggle", (preferences[row.title] ? "settings-toggleOn" : "")].filter(Boolean).join(' ')}>
-                  <View
-                    className={["settings-toggleKnob", (preferences[row.title] ? "settings-toggleKnobOn" : "")].filter(Boolean).join(' ')}
-                  />
-                </Pressable>
+            <View className={"settings-header"}>
+              <View>
+                <Text className={"settings-eyebrow"}>MAKE IT YOURS</Text>
+                <Text className={"settings-title"}>Settings</Text>
+                <Text className={"settings-description"}>Manage your account and preferences.</Text>
               </View>
+              <ProfileMenu />
             </View>
-          ))}
-        </SettingsSection>
 
-        <SettingsSection title="ACCOUNT">
-          <SettingsLink
-            icon={{ ios: 'lock.shield.fill', android: 'security', web: 'security' }}
-            title="Privacy & security"
-            description="Keep your account safe"
-            onPress={() => showUnavailableMessage('Privacy & security')}
-          />
-          <View className={"settings-rowDivider"} />
-          <SettingsLink
-            icon={{ ios: 'person.crop.circle', android: 'manage_accounts', web: 'manage_accounts' }}
-            title="Account details"
-            description="Update your personal information"
-            onPress={() => showUnavailableMessage('Account details')}
-          />
-        </SettingsSection>
+            <Pressable
+              accessibilityRole="button"
+              onPress={openProfileForm}
+              className={"settings-profileCard active:opacity-80 active:scale-[0.98]"}>
+              <View className={"settings-avatar"}>
+                <AppIcon
+                  name={{ ios: 'person.fill', android: 'person', web: 'person' }}
+                  tintColor={colors.dark}
+                  size={22}
+                />
+              </View>
+              <View className={"settings-profileInfo"}>
+                <Text className={"settings-profileName"}>{user?.name || profile.name || 'Your profile'}</Text>
+                <Text className={"settings-profileDescription"}>
+                  {user?.email || profile.email || 'Personal details and account info'}
+                </Text>
+              </View>
+              <View className={"settings-profileArrow"}>
+                <AppIcon
+                  name={{ ios: 'arrow.up.right', android: 'north_east', web: 'north_east' }}
+                  tintColor={colors.dark}
+                  size={16}
+                />
+              </View>
+            </Pressable>
 
-        <SettingsSection title="SUPPORT">
-          <SettingsLink
-            icon={{ ios: 'questionmark.circle.fill', android: 'help', web: 'help' }}
-            title="Help & support"
-            description="Find answers and get in touch"
-            onPress={() => showUnavailableMessage('Help & support')}
-          />
-          <View className={"settings-rowDivider"} />
-          <View className={"settings-row"}>
-            <SettingIcon
-              name={{ ios: 'info.circle.fill', android: 'info', web: 'info' }}
-            />
-            <View className={"settings-rowText"}>
-              <Text className={"settings-rowTitle"}>App version</Text>
-              <Text className={"settings-rowDescription"}>S-wise · 1.0.0</Text>
-            </View>
-          </View>
-        </SettingsSection>
+            <SettingsSection title="PREFERENCES">
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => showUnavailableMessage('Currency')}
+                className={"settings-row settings-valueRow active:opacity-[0.72]"}>
+                <SettingIcon
+                  name={{ ios: 'dollarsign', android: 'attach_money', web: 'attach_money' }}
+                />
+                <View className={"settings-rowText"}>
+                  <Text className={"settings-rowTitle"}>Currency</Text>
+                  <Text className={"settings-rowDescription"}>US Dollar (USD)</Text>
+                </View>
+                <AppIcon
+                  name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
+                  tintColor="#A0A9A1"
+                  size={16}
+                />
+              </Pressable>
+              <View className={"settings-rowDivider"} />
+              {preferenceRows.map((row, index) => (
+                <View key={row.title}>
+                  {index > 0 && <View className={"settings-rowDivider"} />}
+                  <View className={"settings-row"}>
+                    <SettingIcon name={row.icon} />
+                    <View className={"settings-rowText"}>
+                      <Text className={"settings-rowTitle"}>{row.title}</Text>
+                      <Text className={"settings-rowDescription"}>{row.description}</Text>
+                    </View>
+                    <Pressable
+                      accessibilityRole="switch"
+                      accessibilityLabel={row.title}
+                      accessibilityState={{ checked: preferences[row.title] }}
+                      onPress={() =>
+                        setPreferences((current) => ({
+                          ...current,
+                          [row.title]: !current[row.title],
+                        }))
+                      }
+                      className={["settings-toggle", (preferences[row.title] ? "settings-toggleOn" : "")].filter(Boolean).join(' ')}>
+                      <View
+                        className={["settings-toggleKnob", (preferences[row.title] ? "settings-toggleKnobOn" : "")].filter(Boolean).join(' ')}
+                      />
+                    </Pressable>
+                  </View>
+                </View>
+              ))}
+            </SettingsSection>
 
-        <Text className={"settings-footer"}>A little clarity for your everyday.</Text>
+            <SettingsSection title="ACCOUNT">
+              <SettingsLink
+                icon={{ ios: 'lock.shield.fill', android: 'security', web: 'security' }}
+                title="Privacy & security"
+                description="Keep your account safe"
+                onPress={() => showUnavailableMessage('Privacy & security')}
+              />
+              <View className={"settings-rowDivider"} />
+              <SettingsLink
+                icon={{ ios: 'person.crop.circle', android: 'manage_accounts', web: 'manage_accounts' }}
+                title="Account details"
+                description="Update your personal information"
+                onPress={() => showUnavailableMessage('Account details')}
+              />
+            </SettingsSection>
+
+            <SettingsSection title="SUPPORT">
+              <SettingsLink
+                icon={{ ios: 'questionmark.circle.fill', android: 'help', web: 'help' }}
+                title="Help & support"
+                description="Find answers and get in touch"
+                onPress={() => showUnavailableMessage('Help & support')}
+              />
+              <View className={"settings-rowDivider"} />
+              <View className={"settings-row"}>
+                <SettingIcon
+                  name={{ ios: 'info.circle.fill', android: 'info', web: 'info' }}
+                />
+                <View className={"settings-rowText"}>
+                  <Text className={"settings-rowTitle"}>App version</Text>
+                  <Text className={"settings-rowDescription"}>S-wise · 1.0.0</Text>
+                </View>
+              </View>
+            </SettingsSection>
+
+            <Text className={"settings-footer"}>A little clarity for your everyday.</Text>
           </>
         )}
       </ScrollView>
