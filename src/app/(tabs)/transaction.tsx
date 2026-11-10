@@ -1,4 +1,5 @@
 import AppIcon from '../../components/AppIcon';
+import AddTransactionModal from '../../components/AddTransactionModal';
 import { styled } from 'nativewind';
 import { useMemo, useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
@@ -67,6 +68,7 @@ const emptyFilters: TransactionFilters = {
 export default function TransactionScreen() {
   const [search, setSearch] = useState('');
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<TransactionFilters>(emptyFilters);
   const [draftFilters, setDraftFilters] = useState<TransactionFilters>(emptyFilters);
   const [expandedTransactionId, setExpandedTransactionId] = useState<string | null>(null);
@@ -178,6 +180,7 @@ export default function TransactionScreen() {
                 highlighted
                 buttonClassName={"transactions-expenseAddButton"}
                 iconColor={colors.dark}
+                onPress={() => setAddModalVisible(true)}
               />
               <View className={"transactions-metricDivider"} />
               <SummaryMetric
@@ -564,6 +567,11 @@ export default function TransactionScreen() {
           </View>
         </View>
       </Modal>
+
+      <AddTransactionModal
+        visible={addModalVisible}
+        onClose={() => setAddModalVisible(false)}
+      />
     </StyledSafeAreaView>
   );
 }
@@ -637,6 +645,7 @@ function SummaryMetric({
   action = 'add',
   buttonClassName,
   iconColor,
+  onPress,
 }: {
   label: string;
   amount: string;
@@ -644,6 +653,7 @@ function SummaryMetric({
   action?: 'add' | 'update';
   buttonClassName: string;
   iconColor: string;
+  onPress?: () => void;
 }) {
   return (
     <View className={"transactions-metric"}>
@@ -657,6 +667,7 @@ function SummaryMetric({
         accessibilityRole="button"
         accessibilityLabel={`${action === 'add' ? 'Add' : 'Update'} ${label.toLowerCase()}`}
         hitSlop={8}
+        onPress={onPress}
         className={`transactions-metricActionButton ${buttonClassName}`}>
         <AppIcon
           name={
